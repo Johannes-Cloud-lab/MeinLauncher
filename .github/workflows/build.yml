@@ -2,9 +2,6 @@ name: Build Android APK
 
 on: [push, workflow_dispatch]
 
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,14 +15,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Android SDK Location
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
       - name: Build Debug APK
         run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug --stacktrace
-          else
-            gradle assembleDebug --stacktrace
-          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
