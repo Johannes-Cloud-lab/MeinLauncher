@@ -38,16 +38,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getInstalledApps(): List<AppItem> {
-        val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
-            addCategory(Intent.CATEGORY_LAUNCHER)
-        }
-        val apps = packageManager.queryIntentActivities(mainIntent, 0)
-        return apps.map { resolveInfo ->
-            AppItem(
-                label = resolveInfo.loadLabel(packageManager).toString(),
-                packageName = resolveInfo.activityInfo.packageName
-            )
-        }.sortedBy { it.label.lowercase() }
+        val pm = packageManager
+        // Holt alle installierten Apps, nicht nur Launcher-Apps
+        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        
+        return apps
+            .filter { appInfo -> pm.getLaunchIntentForPackage(appInfo.packageName) != null }
+            .map { appInfo ->
+                AppItem(
+                    label = pm.getApplicationLabel(appInfo).toString(),
+                    packageName = appInfo.packageName
+                )
+            }
+            .sortedBy { it.label.lowercase() }
     }
 
     private fun launchApp(packageName: String) {
